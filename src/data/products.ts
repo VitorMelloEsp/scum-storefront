@@ -118,6 +118,15 @@ export const products: Product[] = [
     command: "#spawnitem AmmoCrate762",
     description: "Crate of 200 rounds of 7.62mm ammunition.",
   },
+  {
+    id: "svc-01",
+    name: "Teleport to Safezone",
+    price: 500,
+    image: "https://images.unsplash.com/photo-1524661135-423995f22d0b?w=400&h=300&fit=crop",
+    category: "Services",
+    command: "#TeleportToLocation {STEAMID} X=0 Y=0 Z=0",
+    description: "Instantly teleport your character to the Safezone.",
+  },
 ];
 
 export const categories = ["All", ...Array.from(new Set(products.map((p) => p.category)))];
