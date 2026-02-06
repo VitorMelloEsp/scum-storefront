@@ -10,12 +10,18 @@ interface User {
 interface StoreContextType {
   user: User | null;
   cart: CartItem[];
+  balance: number;
+  walletOpen: boolean;
   loginWithSteam: () => void;
   logout: () => void;
   addToCart: (product: Product) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
+  openWallet: () => void;
+  closeWallet: () => void;
+  addBalance: (amount: number) => void;
+  deductBalance: (amount: number) => boolean;
   cartTotal: number;
   cartCount: number;
 }
@@ -25,6 +31,8 @@ const StoreContext = createContext<StoreContextType | undefined>(undefined);
 export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [balance, setBalance] = useState(0);
+  const [walletOpen, setWalletOpen] = useState(false);
 
   const loginWithSteam = useCallback(() => {
     setUser({ steamId: "76561198012345678", name: "Survivor" });
@@ -33,6 +41,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const logout = useCallback(() => {
     setUser(null);
     setCart([]);
+    setBalance(0);
   }, []);
 
   const addToCart = useCallback((product: Product) => {
@@ -76,6 +85,25 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const clearCart = useCallback(() => setCart([]), []);
 
+  const openWallet = useCallback(() => setWalletOpen(true), []);
+  const closeWallet = useCallback(() => setWalletOpen(false), []);
+
+  const addBalance = useCallback((amount: number) => {
+    setBalance((prev) => prev + amount);
+  }, []);
+
+  const deductBalance = useCallback((amount: number): boolean => {
+    let success = false;
+    setBalance((prev) => {
+      if (prev >= amount) {
+        success = true;
+        return prev - amount;
+      }
+      return prev;
+    });
+    return success;
+  }, []);
+
   const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -84,12 +112,18 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       value={{
         user,
         cart,
+        balance,
+        walletOpen,
         loginWithSteam,
         logout,
         addToCart,
         removeFromCart,
         updateQuantity,
         clearCart,
+        openWallet,
+        closeWallet,
+        addBalance,
+        deductBalance,
         cartTotal,
         cartCount,
       }}

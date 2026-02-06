@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
 import ProductGrid from "@/components/ProductGrid";
 import CartDrawer from "@/components/CartDrawer";
+import WalletModal from "@/components/WalletModal";
 
 const Index = () => {
   const [cartOpen, setCartOpen] = useState(false);
@@ -22,6 +23,7 @@ const Index = () => {
           </p>
         </footer>
         <CartDrawer open={cartOpen} onOpenChange={setCartOpen} />
+        <WalletModal />
       </div>
     </StoreProvider>
   );
