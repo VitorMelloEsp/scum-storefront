@@ -1,8 +1,9 @@
-import { ShoppingCart, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useStore } from "@/contexts/StoreContext";
 import type { Product } from "@/data/products";
 import { useToast } from "@/hooks/use-toast";
+import CoinAmount from "@/components/CoinAmount";
 
 interface ProductCardProps {
   product: Product;
@@ -51,9 +52,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           </p>
         )}
         <div className="flex items-center justify-between">
-          <span className="font-mono text-lg font-bold text-primary">
-            ${product.price.toFixed(2)}
-          </span>
+          <CoinAmount amount={product.price} className="text-lg font-bold text-primary" iconSize={16} />
           <Button size="sm" variant="tactical" onClick={handleAdd} className="gap-1.5">
             <Plus className="h-3.5 w-3.5" />
             Add

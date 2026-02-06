@@ -12,6 +12,7 @@ import { useStore } from "@/contexts/StoreContext";
 import { submitOrder } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import CoinAmount from "@/components/CoinAmount";
 
 interface CartDrawerProps {
   open: boolean;
@@ -19,8 +20,17 @@ interface CartDrawerProps {
 }
 
 export default function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
-  const { user, cart, removeFromCart, updateQuantity, clearCart, cartTotal } =
-    useStore();
+  const {
+    user,
+    cart,
+    removeFromCart,
+    updateQuantity,
+    clearCart,
+    cartTotal,
+    balance,
+    deductBalance,
+    openWallet,
+  } = useStore();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
 
@@ -36,8 +46,32 @@ export default function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
 
     if (cart.length === 0) return;
 
+    // Check balance
+    if (balance < cartTotal) {
+      toast({
+        title: "Insufficient Funds",
+        description: "You don't have enough SCUM Coins. Please top up your wallet.",
+        variant: "destructive",
+      });
+      onOpenChange(false);
+      openWallet();
+      return;
+    }
+
     setLoading(true);
     try {
+      const deducted = deductBalance(cartTotal);
+      if (!deducted) {
+        toast({
+          title: "Insufficient Funds",
+          description: "You don't have enough SCUM Coins. Please top up your wallet.",
+          variant: "destructive",
+        });
+        onOpenChange(false);
+        openWallet();
+        return;
+      }
+
       const result = await submitOrder(user.steamId, cart);
       if (result.success) {
         toast({
@@ -90,9 +124,7 @@ export default function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
                     <p className="text-sm font-semibold text-foreground truncate">
                       {item.name}
                     </p>
-                    <p className="font-mono text-sm text-primary">
-                      ${item.price.toFixed(2)}
-                    </p>
+                    <CoinAmount amount={item.price} className="text-sm text-primary" />
                   </div>
 
                   <div className="flex items-center gap-1.5">
@@ -139,9 +171,7 @@ export default function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
           <div className="border-t border-border pt-4 space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-muted-foreground">Total</span>
-              <span className="text-xl font-bold text-primary font-mono">
-                ${cartTotal.toFixed(2)}
-              </span>
+              <CoinAmount amount={cartTotal} className="text-xl font-bold text-primary" iconSize={18} />
             </div>
             <Separator className="bg-border" />
             <Button
